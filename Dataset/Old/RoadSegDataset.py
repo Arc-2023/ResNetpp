@@ -21,13 +21,13 @@ class TempDataset(Dataset):
         self.transformOfTrain = transformation.Compose([
             # transformation.ToTensor(),
             transformation.PILToTensor(),
-            transformation.Resize((384, 384)),
+            transformation.Resize((512, 512)),
             transformation.Lambda(lambda x: x / 255),
             transformation.ToDtype(torch.float),
         ])
         self.transformOfTest = transformation.Compose([
             transformation.PILToTensor(),
-            transformation.Resize((384, 384)),
+            transformation.Resize((512, 512)),
             transformation.Lambda(lambda x: x / 255),
             transformation.ToDtype(torch.float),
         ])

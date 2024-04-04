@@ -5,17 +5,17 @@ from zoo.modules import *
 
 
 class ResUnetPlusPlus(nn.Module):
-    def __init__(self, int_channel: int = 3, out_channel: int = 1, filters: list[int] = [32, 64, 128, 256, 512]):
+    def __init__(self, in_channel: int = 3, out_channel: int = 1, filters: list[int] = [32, 64, 128, 256, 512]):
         super(ResUnetPlusPlus, self).__init__()
 
         self.input_layer = nn.Sequential(
-            nn.Conv2d(int_channel, filters[0], kernel_size=3, padding=1),
+            nn.Conv2d(in_channel, filters[0], kernel_size=3, padding=1),
             nn.BatchNorm2d(filters[0]),
             nn.ReLU(),
             nn.Conv2d(filters[0], filters[0], kernel_size=3, padding=1),
         )
         self.input_skip = nn.Sequential(
-            nn.Conv2d(int_channel, filters[0], kernel_size=3, padding=1)
+            nn.Conv2d(in_channel, filters[0], kernel_size=3, padding=1)
         )
 
         self.squeeze_excite1 = Squeeze_Excite_Block(filters[0])
