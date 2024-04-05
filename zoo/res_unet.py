@@ -1,20 +1,22 @@
 import torch
 import torch.nn as nn
-from modules import ResidualConv, Upsample
+from torchinfo import summary
+
+from zoo.modules import ResidualConv, Upsample
 
 
 class ResUnet(nn.Module):
-    def __init__(self, channel, filters=[64, 128, 256, 512]):
+    def __init__(self, in_channels: int, out_channels: int, filters=[64, 128, 256, 512]):
         super(ResUnet, self).__init__()
 
         self.input_layer = nn.Sequential(
-            nn.Conv2d(channel, filters[0], kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, filters[0], kernel_size=3, padding=1),
             nn.BatchNorm2d(filters[0]),
             nn.ReLU(),
             nn.Conv2d(filters[0], filters[0], kernel_size=3, padding=1),
         )
         self.input_skip = nn.Sequential(
-            nn.Conv2d(channel, filters[0], kernel_size=3, padding=1)
+            nn.Conv2d(in_channels, filters[0], kernel_size=3, padding=1)
         )
 
         self.residual_conv_1 = ResidualConv(filters[0], filters[1], 2, 1)
@@ -32,7 +34,7 @@ class ResUnet(nn.Module):
         self.up_residual_conv3 = ResidualConv(filters[1] + filters[0], filters[0], 1, 1)
 
         self.output_layer = nn.Sequential(
-            nn.Conv2d(filters[0], 1, 1, 1),
+            nn.Conv2d(filters[0], out_channels, 1, 1),
             nn.Sigmoid(),
         )
 
@@ -62,3 +64,9 @@ class ResUnet(nn.Module):
         output = self.output_layer(x10)
 
         return output
+
+
+if __name__ == "__main__":
+    model = ResUnet(1, 3)
+    print(model)
+    print(summary(model, input_size=(1, 1, 512, 512)))

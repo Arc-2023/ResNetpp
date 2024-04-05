@@ -1,6 +1,7 @@
 from torch import nn
 
 import torch
+from torchinfo import summary
 
 
 # encoding block
@@ -116,11 +117,11 @@ class UNet(nn.Module):
     Main UNet architecture
     """
 
-    def __init__(self, num_classes=1):
+    def __init__(self, in_channel=1, out_channel=3):
         super().__init__()
 
         # encoding
-        self.conv1 = encoding_block(3, 64)
+        self.conv1 = encoding_block(in_channel, 64)
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
         self.conv2 = encoding_block(64, 128)
@@ -142,7 +143,7 @@ class UNet(nn.Module):
         self.decode1 = decoding_block(128, 64)
 
         # final
-        self.final = nn.Conv2d(64, num_classes, kernel_size=1)
+        self.final = nn.Conv2d(64, out_channel, kernel_size=1)
 
     def forward(self, input):
         # encoding
@@ -183,11 +184,11 @@ class UNetSmall(nn.Module):
     Main UNet architecture
     """
 
-    def __init__(self, num_classes=1):
+    def __init__(self, in_channel, out_channel):
         super().__init__()
 
         # encoding
-        self.conv1 = encoding_block(3, 32)
+        self.conv1 = encoding_block(in_channel, 32)
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
         self.conv2 = encoding_block(32, 64)
@@ -209,7 +210,7 @@ class UNetSmall(nn.Module):
         self.decode1 = decoding_block(64, 32)
 
         # final
-        self.final = nn.Conv2d(32, num_classes, kernel_size=1)
+        self.final = nn.Conv2d(32, out_channel, kernel_size=1)
 
     def forward(self, input):
         # encoding
@@ -243,3 +244,8 @@ class UNetSmall(nn.Module):
         )
 
         return final
+
+
+if __name__ == "__main__":
+    model = UNetSmall(in_channel=1, out_channel=3).cuda()
+    summary(model, input_size=(1, 1, 512, 512))

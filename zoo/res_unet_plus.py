@@ -85,5 +85,5 @@ class ResUnetPlusPlus(nn.Module):
 
 
 if __name__ == "__main__":
-    model = ResUnetPlusPlus(3).cuda()
-    summary(model, input_size=(1, 3, 512, 512))
+    model = ResUnetPlusPlus(in_channel=1, out_channel=3).cuda()
+    summary(model, input_size=(1, 1, 512, 512))

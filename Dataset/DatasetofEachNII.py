@@ -1,7 +1,7 @@
 import os.path
 import torch
 import torchvision.io
-from torchvision.transforms import v2 as transformation
+from torchvision.transforms import v2
 from torch.utils.data import Dataset
 import pandas as pd
 from Resconfig import base_TBAD_csv_path
@@ -23,35 +23,35 @@ class DatasetofEachNII(Dataset):
         img = nib.load(''.join(nii_image_path))
         self.img_data = img.get_fdata()
 
+
         mask = nib.load(''.join(nii_label_path))
         self.mask_data = mask.get_fdata()
-        if self.mask_data.ndim < self.img_data.ndim or self.mask_data.shape[2] < self.img_data.shape[2]:
+        # img :512 512 300
+        # mask:512 512 200
+        print(f'img_shape:{self.img_data.shape}')
+        print(f'mask_shape:{self.mask_data.shape}')
+        print(self.mask_data.shape)
+        if self.mask_data.shape[2] < self.img_data.shape[2]:
             # mask_data = np.zeros_like(img_data) + mask_data
             self.mask_data = np.pad(self.mask_data,
                                     (0, self.img_data.shape[2] - self.mask_data.shape[2]),
                                     'constant',
                                     constant_values=0)
-
-        self.transformOfTest = transformation.Compose([
-            transformation.PILToTensor(),
-            transformation.Resize((384, 384)),
-            transformation.Lambda(lambda x: x / 255),
-            transformation.ToDtype(torch.float),
+        print(f'mask_pad_shape:{self.mask_data.shape}')
+        self.trans_train_data = v2.Compose([
+            v2.ToImage(),
+            v2.ToDtype(torch.float16, scale=True),
+            v2.Normalize([1], [1.0]),
+            # v2.Lambda(lambda x: x / 255),
+            # v2.Resize((400, 400)),
+            # v2.Resize((384, 384)),
+            v2.ConvertImageDtype(torch.float),
         ])
-        self.trans_train_data = transformation.Compose([
-            transformation.ToImage(),
-            transformation.ToDtype(torch.float16, scale=True),
-            transformation.Normalize([125], [100.0]),
-            # transformation.Lambda(lambda x: x / 255),
-            transformation.Resize((256, 256)),
-            # transformation.Resize((384, 384)),
-            transformation.ConvertImageDtype(torch.float),
-        ])
-        self.trans_label = transformation.Compose([
-            transformation.ToImage(),
-            # transformation.Resize((384, 384)),
-            transformation.Resize((256, 256)),
-            transformation.ToDtype(torch.long)
+        self.trans_label = v2.Compose([
+            v2.ToImage(),
+            # v2.Resize((384, 384)),
+            # v2.Resize((400, 400)),
+            v2.ToDtype(torch.long)
         ])
 
     def __len__(self):
